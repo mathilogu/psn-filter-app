@@ -11,12 +11,25 @@ if uploaded_file:
         df_psn = pd.read_excel(uploaded_file, sheet_name="PSN_DATA")
         df_dash = pd.read_excel(uploaded_file, sheet_name="Dashboard")
 
-        elements = df_dash.iloc[0, 1:20].tolist()
-        min_vals = df_dash.iloc[1, 1:20].tolist()
-        max_vals = df_dash.iloc[2, 1:20].tolist()
+        # Check Dashboard has at least 3 rows
+        if df_dash.shape[0] < 3:
+            st.error("Dashboard sheet must have at least 3 rows: Element names (row 1), Min (row 2), Max (row 3)")
+            st.stop()
 
+        # Read element names (B1:T1 => columns 1 to 20)
+        element_row = df_dash.iloc[0, 1:]
+        min_row = df_dash.iloc[1, 1:]
+        max_row = df_dash.iloc[2, 1:]
+
+        elements = element_row.tolist()
+        min_vals = min_row.tolist()
+        max_vals = max_row.tolist()
+
+        # Build input_ranges dictionary
         input_ranges = {
-            e: (min_v, max_v) for e, min_v, max_v in zip(elements, min_vals, max_vals) if pd.notna(e)
+            e: (min_v, max_v)
+            for e, min_v, max_v in zip(elements, min_vals, max_vals)
+            if pd.notna(e)
         }
 
         st.subheader("📌 Input Chemistry Range")
